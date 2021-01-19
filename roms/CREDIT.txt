@@ -1,0 +1,5 @@
+All credit for the games, roms, and programs goes to:
+https://github.com/dmatlack
+
+His full Chip-8 emulator can be found at:
+https://github.com/dmatlack/chip8
