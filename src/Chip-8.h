@@ -21,9 +21,10 @@ typedef struct chip8_t{
         unsigned char key[0x10];
 }Chip8;
 
-void chip8_init();
-void chip8_loadRom(char* romPath);
+Chip8* chip8_init();
+void chip8_loadRom(Chip8* c8, char* romPath);
 void chip8_draw(Chip8* c8);
+void chip8_doOpcode(Chip8* c8, uint16_t opcode);
 void chip8_emulateCycle(Chip8* c8);
 void chip8_processInput(SDL_Event* event);
         
