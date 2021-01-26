@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#include <SDL/SDL.h>
+//#include <SDL/SDL.h>
 #include "Chip-8.h"
 
 int main(int argc, char** argv){

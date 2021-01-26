@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <SDL/SDL.h>
+//#include <SDL/SDL.h>
 
 #include "Chip-8.h"
 
@@ -43,6 +43,9 @@ chip8_init(){
         }
 
         // Load fontset into memory
+        /* Could I use memcpy here to just directly 
+         * copy it to the memory instead of looping
+         * through the entire block? */
         for (int i = 0; i < 80; ++i){
                 c8->memory[i] = chip8_fontset[i];
         }
@@ -97,7 +100,9 @@ chip8_doOpcode(Chip8* c8, uint16_t opcode){
 
         printf("OPCODE: 0x%x\n",opcode);
         
-        /* Still looking for a better way to handle the opcodes */
+        /* Still looking for a better way to handle the opcodes.
+         * This seems like the most widely used way to do it though */
+        
         switch(u){
         case 0x0:
                 {
@@ -112,6 +117,11 @@ chip8_doOpcode(Chip8* c8, uint16_t opcode){
                                 c8->pc = c8->stack[(--c8->sp) & 0xF] + 2;
                                 break;
                         }
+
+                        default:
+                                printf("--- UNKNOWN OPCODE : 0x%x ---\n", opcode);
+                                c8->pc += 2;
+                                break;
                 }
 
         case 0x1:
