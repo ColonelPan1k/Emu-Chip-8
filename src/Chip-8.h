@@ -19,6 +19,7 @@ typedef struct chip8_t{
         unsigned short stack[0x10];
         unsigned short sp;
         unsigned char key[0x10];
+        bool drawFlag;
 }Chip8;
 
 Chip8* chip8_init();

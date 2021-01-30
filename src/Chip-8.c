@@ -1,15 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <SDL/SDL.h>
-
+#include <SDL/SDL.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include "Chip-8.h"
-
-// Memory map:
-// 0x000 - 0x1FF - Chip 8 interpreter
-// 0x050 - 0x0A0 - Build in fontset
-// 0x200 - 0xFFF - Program ROM and RAM
-
 
 unsigned char chip8_fontset[80] =
         {
@@ -50,7 +45,6 @@ chip8_init(){
                 c8->memory[i] = chip8_fontset[i];
         }
         
-        
         // Initialize pc = 0x200, sp &= 0, opcode = 0x200
         c8->pc = 0x200;
         c8->sp &= 0;
@@ -58,7 +52,6 @@ chip8_init(){
 
         printf("Chip8 initialized successfully\n");
         return c8;
-        
 }
 
 void
@@ -72,11 +65,10 @@ chip8_loadRom(Chip8* c8, char* romPath){
         fread(c8->memory + 0x200, 1, MEMSIZE - 0x200, rom);
 
         printf("File loaded into memory successfully\n");
-               
 }
 
 void
-chip8_draw(Chip8* c8){
+chip8_draw(Chip8* c8, unsigned char Vx, unsigned char Vy, unsigned n){
         
 }
 
@@ -117,17 +109,11 @@ chip8_doOpcode(Chip8* c8, uint16_t opcode){
                                 c8->pc = c8->stack[(--c8->sp) & 0xF] + 2;
                                 break;
                         }
-
-                        default:
-                                printf("--- UNKNOWN OPCODE : 0x%x ---\n", opcode);
-                                c8->pc += 2;
-                                break;
-                }
+                } break;
 
         case 0x1:
                 printf("goto %x\n", nnn);
                 c8->pc = nnn;
-                c8->pc += 2;
                 break;
         case 0x2:
                 printf("Call subroutine %x\n", nnn);
@@ -223,10 +209,13 @@ chip8_doOpcode(Chip8* c8, uint16_t opcode){
                 } break;
         case 0x9:
                 printf("Skip next instruction if V[%i] (%i) != V[%i] (%i)\n", x, c8->V[x], y, c8->V[y]);
-                if (c8->V[x] != c8->V[y])
+                if (c8->V[x] != c8->V[y]){
+                        printf("Skipped instruction\n");
                         c8->pc += 4;
-                else
+                } else {
+                        printf("Did not skip instruction\n");
                         c8->pc += 2;
+                }
                 break;
         case 0xA:
                 printf("I = %i\n", nnn);
@@ -244,7 +233,9 @@ chip8_doOpcode(Chip8* c8, uint16_t opcode){
                 break;
         case 0xD:
                 printf("Draw sprite at (%i, %i) with height %i\n", x, y, p);
+                chip8_draw(c8, V[x], V[y], n);
                 c8->pc += 2;
+                c8->drawFlag = true;
                 break;
         case 0xE:
                 printf("Handle keypress\n");
@@ -296,9 +287,8 @@ chip8_doOpcode(Chip8* c8, uint16_t opcode){
                 default:
                         printf("--- UNKNOWN OPCODE: 0x%x ---\n", opcode);
                         c8->pc += 2;
-                }
+                } break;
 
-                break;
         default:
                 printf("--- UNKNOWN OPCODE : 0x%x-----\n", opcode);
                 c8->pc += 2;
@@ -306,11 +296,19 @@ chip8_doOpcode(Chip8* c8, uint16_t opcode){
         }
 }
 
+/* Just an easier way to dump the opcodes to the console */
+void
+chip8_dumpRom(Chip8* c8, uint16_t opcode){
+        printf("===== OPCODE: 0x%x ===== \n", opcode);
+        c8->pc += 2;
+}
+
 void
 chip8_emulateCycle(Chip8* c8){
         // Fetch an opcode from memory
         uint16_t opcode = c8->memory[c8->pc] << 8 | c8->memory[c8->pc + 1];
 
+ 
         // Decode and execute opcode
         chip8_doOpcode(c8, opcode);
 
