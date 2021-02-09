@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <SDL/SDL.h>
+//#include <SDL/SDL.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "Chip-8.h"
@@ -67,9 +67,41 @@ chip8_loadRom(Chip8* c8, char* romPath){
         printf("File loaded into memory successfully\n");
 }
 
+// I should probably learn how this actually works rather than just pull someone else's code
 void
 chip8_draw(Chip8* c8, unsigned char Vx, unsigned char Vy, unsigned n){
-        
+        unsigned row = Vy, col = Vx;
+        unsigned byteIndex;
+        unsigned bitIndex;
+
+        c8->V[0xF] = 0;
+        for (byteIndex = 0; byteIndex < n; byteIndex++){
+                uint8_t byte = c8->memory[c8->I + byteIndex];
+
+                for (bitIndex = 0; bitIndex < 8; bitIndex++){
+                        uint8_t bit = (byte >> bitIndex) & 0x1;
+                        uint8_t *pixelp = &c8->graphics[(row + byteIndex) % GFX_ROWS][(col + (7 - bitIndex)) % GFX_COLS];
+
+                        *pixelp = *pixelp ^ bit;
+                }
+        }
+}
+
+/* Works the same as the regular draw function, but draws to the console */
+void
+chip8_drawDebug(Chip8* c8){
+        int x, y;
+
+        for (y = 0; y < 32; ++y){
+                for (x = 0; x < 64; ++x){
+                        if (c8->graphics[y][x] == 0)
+                                printf("0");
+                        else
+                                printf(" ");
+                }
+                putchar('\n');
+        }
+        putchar('\n');
 }
 
 /* Don't know a better way to move the pc other than
@@ -233,7 +265,8 @@ chip8_doOpcode(Chip8* c8, uint16_t opcode){
                 break;
         case 0xD:
                 printf("Draw sprite at (%i, %i) with height %i\n", x, y, p);
-                chip8_draw(c8, V[x], V[y], n);
+                chip8_draw(c8, c8->V[x], c8->V[y], p);
+                chip8_drawDebug(c8);
                 c8->pc += 2;
                 c8->drawFlag = true;
                 break;
@@ -314,7 +347,6 @@ chip8_emulateCycle(Chip8* c8){
 
 }
 
-void chip8_processInput(SDL_Event* event){
-        
-}
+//void chip8_processInput(SDL_Event* event){
+
         
