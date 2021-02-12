@@ -1,0 +1,9 @@
+* TODO Finish (and understand) draw function
+
+* TODO Set up SDL 
+
+* TODO Get SDL to draw to the screen
+
+* TODO Figure out controls
+
+* TODO Pass tests and play a game with it
